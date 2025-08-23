@@ -1,0 +1,6 @@
+[submodule "FinanzasBackend"]
+	path = FinanzasBackend
+	url = ./FinanzasBackend
+[submodule "FinanzasFrontend"]
+	path = FinanzasFrontend
+	url = ./FinanzasFrontend
