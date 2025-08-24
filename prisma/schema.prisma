@@ -1,0 +1,169 @@
+// SPDX-License-Identifier: MIT
+// Indica la versión de Prisma que estás utilizando
+// y el proveedor de la base de datos.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // La URL se carga desde las variables de entorno
+}
+
+// Especifica el generador de cliente de Prisma.
+// Esto crea el cliente de Prisma basado en tu esquema.
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ========================================
+// 1. Modelo de Autenticación y Usuario (Preparado para SaaS)
+// ========================================
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  password  String    // Hash de la contraseña
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relaciones: Un usuario tiene muchas de estas cosas
+  accounts      Account[]
+  categories    Category[]
+  transactions  Transaction[]
+  budgets       Budget[]
+  loans         Loan[]
+  counterparties Counterparty[]
+  installmentPlans InstallmentPlan[]
+}
+
+// ========================================
+// 2. Core Financiero: Cuentas y Transacciones
+// ========================================
+
+// Tipo de cuenta: Banco, Efectivo, Billetera Digital, etc.
+model Account {
+  id        String   @id @default(cuid())
+  name      String   // Ej: "BCP Soles", "Efectivo", "Yape"
+  type      String   // "BANK", "CASH", "E_WALLET"
+  currency  String   @default("PEN")
+  balance   Decimal  @default(0)
+  createdAt DateTime @default(now())
+
+  // Relación con el usuario
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  
+  @@index([userId])
+}
+
+// Categorías para gastos/ingresos
+model Category {
+  id    String @id @default(cuid())
+  name  String // "Comida", "Transporte", "Salario"
+  
+  // Relación con el usuario
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  // Una categoría puede tener muchos presupuestos (uno por mes/año)
+  budgets Budget[]
+
+  @@unique([userId, name]) // Un usuario no puede tener categorías duplicadas
+  @@index([userId])
+}
+
+// El corazón de la app: cada movimiento de dinero
+model Transaction {
+  id          String   @id @default(cuid())
+  description String
+  amount      Decimal
+  date        DateTime
+  
+  // NUEVO: Tipo de transacción para separar la lógica
+  type        TransactionType @default(REGULAR)
+
+  // Relaciones
+  account     Account  @relation(fields: [accountId], references: [id])
+  accountId   String
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+
+  // NUEVO: Campo para enlazar transferencias
+  linkedTransactionId String? @unique
+
+  @@index([userId, date])
+}
+
+// NUEVO: Enum para el tipo de transacción
+enum TransactionType {
+  REGULAR      // Gasto o Ingreso normal
+  TRANSFER     // Parte de una transferencia interna
+  LENDING      // Desembolso o pago de un préstamo que dí
+  INSTALLMENT  // Pago de una cuota de una compra
+}
+
+
+// ========================================
+// 3. Modelo de Presupuestos (Budgets)
+// ========================================
+
+model Budget {
+  id        String   @id @default(cuid())
+  year      Int      // Ej: 2025
+  month     Int      // Ej: 8 (para Agosto)
+  amount    Decimal  // Monto presupuestado
+  rollover  Boolean  @default(false) // ¿El sobrante/faltante pasa al siguiente mes?
+
+  // Relaciones
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+
+  @@unique([userId, categoryId, year, month]) // Solo un presupuesto por categoría al mes
+  @@index([userId])
+}
+
+// ========================================
+// 4. Modelos para Préstamos y Cuotas (Addendum)
+// ========================================
+
+// Contrapartes (a quién le prestas)
+model Counterparty {
+  id     String @id @default(cuid())
+  name   String
+  
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+  loans  Loan[]
+  
+  @@index([userId])
+}
+
+// Préstamos que TÚ realizas
+model Loan {
+  id                  String   @id @default(cuid())
+  principal           Decimal
+  outstandingPrincipal Decimal
+  issueDate           DateTime
+  status              String   // "ACTIVE", "CLOSED"
+
+  counterparty   Counterparty @relation(fields: [counterpartyId], references: [id])
+  counterpartyId String
+  user           User         @relation(fields: [userId], references: [id])
+  userId         String
+  
+  @@index([userId])
+}
+
+// Compras a cuotas sin interés
+model InstallmentPlan {
+  id              String   @id @default(cuid())
+  description     String
+  totalAmount     Decimal
+  installments    Int      // Número de cuotas
+  
+  user            User     @relation(fields: [userId], references: [id])
+  userId          String
+  
+  @@index([userId])
+}

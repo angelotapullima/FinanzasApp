@@ -1,0 +1,12 @@
+{
+  "name": "addemdum",
+  "version": "1.0.0",
+  "description": "> **Objetivo**: Crear una app web para uso personal que registre gastos/ingresos, controle cuentas bancarias, tarjetas de crédito, efectivo, deudas, préstamos y presupuestos. Debe ser escalable a **SaaS multiusuario**. La app móvil se implementará más adelante en **Flutter**.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
