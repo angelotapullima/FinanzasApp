@@ -42,9 +42,8 @@ Estos son los comandos que usarás con más frecuencia. Ejecútalos desde la ter
     *   `cd ..` (Vuelve a la raíz del proyecto)
 2.  **Construir las imágenes de Docker:** `docker-compose build`
 3.  **Levantar los servicios:** `docker-compose up -d`
-4.  **Inicializar la base de datos:**
-    *   `type create_db.sql | docker-compose exec -T db psql -U gemini -d finanzas_db`
-    *   *(Opcional: Si necesitas poblar con datos de prueba: `type populate_test_data.sql | docker-compose exec -T db psql -U gemini -d finanzas_db`)*
+4.  **Inicialización automática de la base de datos:**
+    La base de datos se inicializará automáticamente con el esquema (`create_db.sql`) y los datos de prueba (`populate_test_data.sql`) la primera vez que el contenedor `db` se inicie con un volumen vacío. No se requiere ninguna acción manual aquí.
 5.  **Acceder a la app:** Abre `http://localhost:8080` en tu navegador.
 
 ### Desarrollo Diario
@@ -54,11 +53,8 @@ Estos son los comandos que usarás con más frecuencia. Ejecútalos desde la ter
     *   Los cambios en el código del backend se reflejarán automáticamente gracias al volumen montado.
     *   Si haces cambios en `package.json` (añadir/quitar dependencias), necesitarás reconstruir la imagen del backend: `docker-compose build backend`.
 3.  **Para cambios en el Frontend:**
-    *   Haz tus cambios en el código fuente.
-    *   Ejecuta `cd FinanzasFrontend && npm run build` localmente para actualizar la carpeta `dist`.
-    *   Vuelve a la raíz del proyecto (`cd ..`).
-    *   Reconstruye la imagen del frontend para que Docker copie los nuevos archivos: `docker-compose build frontend`.
-    *   Reinicia el contenedor del frontend si es necesario: `docker-compose restart frontend`.
+    *   Los cambios en el código fuente se reflejarán automáticamente en el navegador gracias al hot-reloading del servidor de desarrollo de Vite.
+    *   Si haces cambios en `package.json` (añadir/quitar dependencias), necesitarás reconstruir la imagen del frontend: `docker-compose build frontend`.
 4.  **Ver logs si algo falla:** `docker-compose logs -f backend` o `docker-compose logs -f frontend`
 5.  **Cuando termines de trabajar:** `docker-compose down`
 
@@ -89,6 +85,30 @@ Estos son los comandos que usarás con más frecuencia. Ejecútalos desde la ter
     - **Usuario:** `gemini` (o lo que tengas en `.env`)
     - **Contraseña:** `supersecret` (o lo que tengas en `.env`)
     - **Base de datos:** `finanzas_db` (o lo que tengas en `.env`)
+
+#### f. Health Checks
+- Los health checks permiten a Docker verificar si un contenedor está realmente "sano" y listo para operar, no solo si está corriendo.
+- Son cruciales para la orquestación y el despliegue, ya que otros servicios pueden esperar a que un servicio dependiente esté "sano" antes de iniciar.
+- Se definen en `docker-compose.yml` para cada servicio:
+    - **`db` (PostgreSQL):** Verifica si la base de datos está lista para aceptar conexiones.
+    - **`backend` (API Node.js):** Asume un endpoint `/health` que devuelve 200 OK.
+    - **`frontend` (Nginx proxying Vite dev server):** Verifica si Nginx está respondiendo en el puerto 80.
+
+#### f. Health Checks
+- Los health checks permiten a Docker verificar si un contenedor está realmente "sano" y listo para operar, no solo si está corriendo.
+- Son cruciales para la orquestación y el despliegue, ya que otros servicios pueden esperar a que un servicio dependiente esté "sano" antes de iniciar.
+- Se definen en `docker-compose.yml` para cada servicio:
+    - **`db` (PostgreSQL):** Verifica si la base de datos está lista para aceptar conexiones.
+    - **`backend` (API Node.js):** Asume un endpoint `/health` que devuelve 200 OK.
+    - **`frontend` (Nginx proxying Vite dev server):** Verifica si Nginx está respondiendo en el puerto 80.
+
+#### f. Health Checks
+- Los health checks permiten a Docker verificar si un contenedor está realmente "sano" y listo para operar, no solo si está corriendo.
+- Son cruciales para la orquestación y el despliegue, ya que otros servicios pueden esperar a que un servicio dependiente esté "sano" antes de iniciar.
+- Se definen en `docker-compose.yml` para cada servicio:
+    - **`db` (PostgreSQL):** Verifica si la base de datos está lista para aceptar conexiones.
+    - **`backend` (API Node.js):** Asume un endpoint `/health` que devuelve 200 OK.
+    - **`frontend` (Nginx proxying Vite dev server):** Verifica si Nginx está respondiendo en el puerto 80.
 
 ---
 
@@ -131,6 +151,11 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     container_name: finanzas-backend
@@ -147,6 +172,12 @@ services:
     volumes:
       - ./FinanzasBackend:/usr/src/app # Para desarrollo con hot-reload
       - /usr/src/app/node_modules # No sobreescribir node_modules
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"] # Asumiendo un endpoint /health
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
   frontend:
     container_name: finanzas-frontend
@@ -158,6 +189,12 @@ services:
       - "${FRONTEND_PORT}:80"
     depends_on:
       - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
 volumes:
   pgdata:
@@ -168,27 +205,30 @@ volumes:
 <summary>Ver contenido de <code>FinanzasBackend/Dockerfile</code></summary>
 
 ```dockerfile
-# 1. Base Image
-FROM node:22
+# Stage 1: Build the application
+FROM node:22 AS build
 
-# 2. Set working directory
 WORKDIR /usr/src/app
 
-# 3. Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
 
-
-# 6. Copy the rest of the application code
 COPY . .
-
-# 7. Build TypeScript code
 RUN npm run build
 
-# 8. Expose the port the app runs on
+# Stage 2: Create the production-ready image
+FROM node:22-slim
+
+WORKDIR /usr/src/app
+
+# Copy only the built files and production node_modules
+COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/node_modules ./node_modules
+
+# Expose the port the app runs on
 EXPOSE 3000
 
-# 9. Command to run the application
+# Command to run the application
 CMD ["node", "dist/index.js"]
 ```
 </details>
@@ -197,34 +237,17 @@ CMD ["node", "dist/index.js"]
 <summary>Ver contenido de <code>FinanzasFrontend/Dockerfile</code></summary>
 
 ```dockerfile
-# Stage 1: Build the Vue.js application (This stage is now effectively a placeholder for local build)
-FROM node:22 AS build
+FROM node:22
 
 WORKDIR /app
 
-# No npm install or npm run build here. These steps are done locally.
-# COPY package*.json ./
-# RUN npm cache clean --force && npm install
-# RUN npm rebuild esbuild
-# COPY . .
-# ENV ESBUILD_BINARY_PATH=node
-# RUN npm run build
+COPY package*.json ./
+RUN npm install
 
-# Stage 2: Serve the application with Nginx
-FROM nginx:alpine
+# Expose Vite's default dev server port
+EXPOSE 5173
 
-# Copy the built files from the local build (dist folder)
-# This assumes you have run `npm run build` locally in FinanzasFrontend
-COPY dist /usr/share/nginx/html
-
-# Copy the Nginx configuration file
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port 80
-EXPOSE 80
-
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm", "run", "dev"] # This will be overridden by docker-compose for dev
 ```
 </details>
 
@@ -237,12 +260,14 @@ server {
     server_name localhost;
 
     location / {
-        root /usr/share/nginx/html;
-        index index.html;
-        try_files $uri $uri/ /index.html;
+        proxy_pass http://frontend:5173; # Proxy to Vite dev server
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # Proxy API requests to the backend service
+    # Proxy API requests to the backend service (this remains the same)
     location /api {
         proxy_pass http://backend:3000;
         proxy_set_header Host $host;
