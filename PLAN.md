@@ -44,20 +44,15 @@ Establecer el entorno de desarrollo y desarrollar la funcionalidad completa de g
 - [x] **Fase 6: Préstamos que YO Realizo (Lending Personal)**
 - [ ] **Fase 7: Reportes y Análisis**
     - [x] 7.1. **Reporte: Gastos por Categoría** (Backend y Frontend)
-    - [ ] 7.2. **Reporte: Flujo de Caja** (Backend y Frontend)
-    - [ ] 7.3. **Reporte: Evolución de Saldos** (Backend y Frontend)
-    - [ ] 7.4. **Reporte: Resumen de Ingresos y Gastos** (Backend y Frontend)
-    - [ ] 7.5. **Reporte: Obligaciones Próximas / Pagos Pendientes** (Backend y Frontend)
-    - [ ] 7.6. **Reporte: Resumen de Presupuestos** (Backend y Frontend)
-    - [ ] 7.7. **Reporte: Estado de Préstamos y Cuotas** (Backend y Frontend)
-    - [x] 7.1. **Reporte: Gastos por Categoría** (Backend y Frontend)
-    - [ ] 7.2. **Reporte: Flujo de Caja** (Backend y Frontend)
+    - [x] 7.2. **Reporte: Flujo de Caja** (Backend y Frontend)
     - [ ] 7.3. **Reporte: Evolución de Saldos** (Backend y Frontend)
     - [ ] 7.4. **Reporte: Resumen de Ingresos y Gastos** (Backend y Frontend)
     - [ ] 7.5. **Reporte: Obligaciones Próximas / Pagos Pendientes** (Backend y Frontend)
     - [x] 7.6. **Reporte: Resumen de Presupuestos** (Backend y Frontend)
     - [ ] 7.7. **Reporte: Estado de Préstamos y Cuotas** (Backend y Frontend)
-    - [ ] 7.8. **Refactorización del Sidebar para Reportes:** Implementar subsecciones colapsables para los reportes.
+    - [x] 7.8. **Refactorización del Sidebar para Reportes:** Implementar subsecciones colapsables para los reportes.
+    - [x] 7.9. **Refactorización de Arquitectura de Reportes:** Migrar a páginas dedicadas por reporte (`/reports/flujo-de-caja`, etc.) y una página de índice en `/reports`.
+    - [ ] 7.10. **Mejoras de UX en Reportes:** Añadir carga por defecto (mes actual) y filtros rápidos (semana, día, rango personalizado) a todas las páginas de reportes.
 - [ ] **Fase 8: Importación de Datos (CSV/Excel)**
 - [ ] **Fase 9: Alertas y Notificaciones**
 - [ ] **Fase 10: Mejoras de UX y Pulido**

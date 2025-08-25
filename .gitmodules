@@ -1,6 +1,7 @@
 [submodule "FinanzasBackend"]
-	path = FinanzasBackend
-	url = ./FinanzasBackend
+    path = FinanzasBackend
+    url = git@github.com:angelotapullima/FinanzasBackend.git
+
 [submodule "FinanzasFrontend"]
-	path = FinanzasFrontend
-	url = ./FinanzasFrontend
+    path = FinanzasFrontend
+    url = git@github.com:angelotapullima/FinanzasFrontend.git
