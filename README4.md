@@ -98,7 +98,7 @@ La aplicación busca permitir registrar, organizar y analizar de forma clara tod
 
   * **Web**: Vue3, TypeScript, shadcn/ui, Tailwind.
   * **Backend**: Node.js + TypeScript (NestJS o Express con modularización).
-  * **Base de Datos**: PostgreSQL + Prisma ORM.
+  * **Base de Datos**: PostgreSQL (SQL Puro).
   * **Cache/Jobs**: Redis.
   * **Infraestructura**: Docker Compose local; escalable a Azure (PaaS, DBaaS) en versión SaaS.
   * **Móvil (futuro)**: Flutter (iOS/Android) consumiendo la misma API.
@@ -112,42 +112,9 @@ La aplicación busca permitir registrar, organizar y analizar de forma clara tod
   * **Loan** (préstamo entregado): id, beneficiario, monto, fechaInicio, tasa (opcional), cuotas?, pagos[].
   * **LoanPayment**: id, loanId, fecha, monto, saldoRestante.
 
-Ejemplo Prisma extendido:
+Ejemplo de esquema de datos (SQL):
 
-```prisma
-model Loan {
-  id           String   @id @default(cuid())
-  borrower     String   // nombre de la persona
-  totalAmount  Decimal
-  startDate    DateTime
-  installments Int?
-  interestRate Decimal? // opcional
-  status       String   // ACTIVE | CLOSED | DEFAULTED
-  payments     LoanPayment[]
-}
 
-model LoanPayment {
-  id        String   @id @default(cuid())
-  loanId    String
-  loan      Loan @relation(fields: [loanId], references: [id])
-  date      DateTime
-  amount    Decimal
-  remaining Decimal
-}
-
-model Transaction {
-  id           String   @id @default(cuid())
-  kind         TransactionKind
-  amount       Decimal
-  date         DateTime
-  accountId    String?
-  cardId       String?
-  categoryId   String?
-  note         String?
-  isInstallment Boolean @default(false)
-  paidAmount   Decimal  @default(0)
-}
-```
 
 -----
 
@@ -332,7 +299,7 @@ Para poner en marcha el proyecto localmente, necesitarás los siguientes prerreq
     Crea un archivo `.env` en la raíz del directorio del backend con las variables de entorno necesarias (ej. `DATABASE_URL`, `REDIS_URL`, etc.). Consulta un posible archivo `.env.example` si existe.
 5.  **Ejecutar Migraciones de la Base de Datos**:
     ```bash
-    npx prisma migrate dev --name init # o el comando de migración correspondiente
+    Ejecutar el script `create_db.sql` para inicializar la base de datos.
     ```
 6.  **Instalar Dependencias del Frontend**:
     ```bash

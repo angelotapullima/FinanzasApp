@@ -1,23 +1,45 @@
-version: '3.8'
-
 services:
   db:
-    image: postgres:13
+    image: postgres:15-alpine
+    container_name: finanzas-db
     restart: always
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: finanzas_db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
 
-  redis:
-    image: redis:6.2-alpine
+  backend:
+    container_name: finanzas-backend
+    build:
+      context: ./FinanzasBackend
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    depends_on:
+      - db
+    volumes:
+      - ./FinanzasBackend:/usr/src/app # Para desarrollo con hot-reload
+      - /usr/src/app/node_modules # No sobreescribir node_modules
+
+  frontend:
+    container_name: finanzas-frontend
+    build:
+      context: ./FinanzasFrontend
+      dockerfile: Dockerfile
     restart: always
     ports:
-      - "6379:6379"
+      - "${FRONTEND_PORT}:80"
+    depends_on:
+      - backend
 
 volumes:
-  db_data:
+  pgdata:

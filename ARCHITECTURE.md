@@ -25,7 +25,7 @@ La aplicación sigue una arquitectura de microservicios o una arquitectura modul
 *   **Frontend (Mobile)**: Flutter (Dart).
 *   **Backend (API)**: Node.js + TypeScript (NestJS o Express con modularización).
 *   **Base de Datos**: PostgreSQL.
-*   **ORM**: Prisma ORM.
+*   **ORM**: SQL Puro (futuro TypeORM).
 *   **Cache/Jobs**: Redis.
 *   **Infraestructura**: Docker Compose (local), escalable a Azure (PaaS, DBaaS).
 
@@ -57,7 +57,7 @@ El backend es el cerebro de la aplicación, responsable de la lógica de negocio
 *   **Responsabilidades**:
     *   **Exposición de API RESTful**: Provee los endpoints necesarios para que el frontend interactúe con los datos y la lógica de negocio.
     *   **Lógica de Negocio**: Implementa las reglas financieras, validaciones de datos, cálculos de saldos, gestión de presupuestos, lógica de cuotas y préstamos.
-    *   **Interacción con la Base de Datos**: Utiliza Prisma ORM para interactuar con PostgreSQL, realizando operaciones CRUD y consultas complejas.
+    *   **Interacción con la Base de Datos**: Interactúa con PostgreSQL utilizando SQL puro, realizando operaciones CRUD y consultas complejas. Se planea migrar a TypeORM en el futuro.
     *   **Autenticación**: Inicialmente una autenticación simple para uso personal, diseñada para escalar a sistemas más robustos como OAuth/JWT para el modelo SaaS.
 *   **Endpoints Clave (Ejemplos)**:
     *   `/accounts`: GET, POST, PUT, DELETE
@@ -75,11 +75,11 @@ El backend es el cerebro de la aplicación, responsable de la lógica de negocio
 
 ### 3.3. Base de Datos
 
-PostgreSQL es la base de datos relacional elegida, gestionada a través de Prisma ORM para un desarrollo eficiente y tipado seguro.
+PostgreSQL es la base de datos relacional elegida, gestionada a través de SQL puro. Se planea migrar a TypeORM en el futuro para un desarrollo más eficiente y tipado seguro.
 
 *   **Tecnología**: PostgreSQL.
-*   **ORM**: Type ORM.
-*   **Esquema de Datos (Basado en `prisma/schema.prisma`)**:
+*   **ORM**: SQL Puro (futuro TypeORM).
+*   **Esquema de Datos (Definido en `create_db.sql`)**:
 
     *   `User`: Gestión de usuarios (preparado para SaaS).
         *   `id`, `email`, `name`, `password`, `createdAt`, `updatedAt`.
@@ -143,7 +143,7 @@ Para configurar el entorno de desarrollo local:
 *   **Pasos de Instalación y Ejecución**:
     1.  Clonar el repositorio.
     2.  `docker-compose up -d` para levantar DB y Redis.
-    3.  `cd backend && npm install && npx prisma migrate dev --name init`
+    3.  `cd backend && npm install`
     4.  Configurar `.env` en el backend.
     5.  `cd ../frontend && npm install`
     6.  Configurar `.env.local` en el frontend.
