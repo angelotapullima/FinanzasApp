@@ -16,7 +16,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -33,11 +33,14 @@ services:
       - "${API_PORT}:${API_PORT}"
     depends_on:
       - db
-    volumes:
-      - ./FinanzasBackend:/usr/src/app # Para desarrollo con hot-reload
-      - /usr/src/app/node_modules # No sobreescribir node_modules
+    # Volumes are commented out to ensure the container runs with the code and modules
+    # built into the image, which is more reliable. For development with hot-reload,
+    # these lines can be restored, but you must manage node_modules locally.
+    # volumes:
+    #   - ./FinanzasBackend:/usr/src/app
+    #   - /usr/src/app/node_modules
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"] # Asumiendo un endpoint /health
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -60,5 +63,39 @@ services:
       retries: 3
       start_period: 20s
 
+  prometheus:
+    image: prom/prometheus
+    container_name: finanzas-prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command: --config.file=/etc/prometheus/prometheus.yml
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  grafana:
+    image: grafana/grafana
+    container_name: finanzas-grafana
+    restart: always
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      prometheus:
+        condition: service_healthy
+
 volumes:
   pgdata:
+  prometheus_data:
+  grafana_data:

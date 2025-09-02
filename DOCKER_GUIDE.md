@@ -110,6 +110,54 @@ Estos son los comandos que usarás con más frecuencia. Ejecútalos desde la ter
     - **`backend` (API Node.js):** Asume un endpoint `/health` que devuelve 200 OK.
     - **`frontend` (Nginx proxying Vite dev server):** Verifica si Nginx está respondiendo en el puerto 80.
 
+#### f. Health Checks
+- Los health checks permiten a Docker verificar si un contenedor está realmente "sano" y listo para operar, no solo si está corriendo.
+- Son cruciales para la orquestación y el despliegue, ya que otros servicios pueden esperar a que un servicio dependiente esté "sano" antes de iniciar.
+- Se definen en `docker-compose.yml` para cada servicio:
+    - **`db` (PostgreSQL):** Verifica si la base de datos está lista para aceptar conexiones.
+    - **`backend` (API Node.js):** Asume un endpoint `/health` que devuelve 200 OK.
+    - **`frontend` (Nginx proxying Vite dev server):** Verifica si Nginx está respondiendo en el puerto 80.
+
+#### f. Health Checks
+- Los health checks permiten a Docker verificar si un contenedor está realmente "sano" y listo para operar, no solo si está corriendo.
+- Son cruciales para la orquestación y el despliegue, ya que otros servicios pueden esperar a que un servicio dependiente esté "sano" antes de iniciar.
+- Se definen en `docker-compose.yml` para cada servicio:
+    - **`db` (PostgreSQL):** Verifica si la base de datos está lista para aceptar conexiones.
+    - **`backend` (API Node.js):** Asume un endpoint `/health` que devuelve 200 OK.
+    - **`frontend` (Nginx proxying Vite dev server):** Verifica si Nginx está respondiendo en el puerto 80.
+
+#### f. Health Checks
+- Los health checks permiten a Docker verificar si un contenedor está realmente "sano" y listo para operar, no solo si está corriendo.
+- Son cruciales para la orquestación y el despliegue, ya que otros servicios pueden esperar a que un servicio dependiente esté "sano" antes de iniciar.
+- Se definen en `docker-compose.yml` para cada servicio:
+    - **`db` (PostgreSQL):** Verifica si la base de datos está lista para aceptar conexiones.
+    - **`backend` (API Node.js):** Asume un endpoint `/health` que devuelve 200 OK.
+    - **`frontend` (Nginx proxying Vite dev server):** Verifica si Nginx está respondiendo en el puerto 80.
+
+#### f. Health Checks
+- Los health checks permiten a Docker verificar si un contenedor está realmente "sano" y listo para operar, no solo si está corriendo.
+- Son cruciales para la orquestación y el despliegue, ya que otros servicios pueden esperar a que un servicio dependiente esté "sano" antes de iniciar.
+- Se definen en `docker-compose.yml` para cada servicio:
+    - **`db` (PostgreSQL):** Verifica si la base de datos está lista para aceptar conexiones.
+    - **`backend` (API Node.js):** Asume un endpoint `/health` que devuelve 200 OK.
+    - **`frontend` (Nginx proxying Vite dev server):** Verifica si Nginx está respondiendo en el puerto 80.
+
+#### f. Health Checks
+- Los health checks permiten a Docker verificar si un contenedor está realmente "sano" y listo para operar, no solo si está corriendo.
+- Son cruciales para la orquestación y el despliegue, ya que otros servicios pueden esperar a que un servicio dependiente esté "sano" antes de iniciar.
+- Se definen en `docker-compose.yml` para cada servicio:
+    - **`db` (PostgreSQL):** Verifica si la base de datos está lista para aceptar conexiones.
+    - **`backend` (API Node.js):** Asume un endpoint `/health` que devuelve 200 OK.
+    - **`frontend` (Nginx proxying Vite dev server):** Verifica si Nginx está respondiendo en el puerto 80.
+
+#### f. Health Checks
+- Los health checks permiten a Docker verificar si un contenedor está realmente "sano" y listo para operar, no solo si está corriendo.
+- Son cruciales para la orquestación y el despliegue, ya que otros servicios pueden esperar a que un servicio dependiente esté "sano" antes de iniciar.
+- Se definen en `docker-compose.yml` para cada servicio:
+    - **`db` (PostgreSQL):** Verifica si la base de datos está lista para aceptar conexiones.
+    - **`backend` (API Node.js):** Asume un endpoint `/health` que devuelve 200 OK.
+    - **`frontend` (Nginx proxying Vite dev server):** Verifica si Nginx está respondiendo en el puerto 80.
+
 ---
 
 ## 📜 5. Contenido de los Archivos de Configuración
