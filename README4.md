@@ -99,23 +99,21 @@ La aplicación busca permitir registrar, organizar y analizar de forma clara tod
   * **Web**: Vue3, TypeScript, shadcn/ui, Tailwind.
   * **Backend**: Node.js + Express.js con modularización.
   * **Base de Datos**: PostgreSQL (SQL Puro).
+  * **Autenticación**: JWT (JSON Web Tokens).
+  * **Autorización**: Roles (RBAC).
   * **Infraestructura**: Docker Compose local para servicios futuros; actualmente la base de datos se ejecuta localmente. Escalable a Azure (PaaS, DBaaS) en versión SaaS.
   * **Móvil (futuro)**: Flutter (iOS/Android) consumiendo la misma API.
-  * **Autenticación**: simple (para uso personal), escalable a OAuth/JWT.
 
 -----
 
 ## Modelo de Datos
 
-  * **Transaction**: ahora admite `isInstallment` (true/false) y `paidAmount` para compras sin cuotas pero que se pagan después.
+  * **User**: Se añade el campo `role` (`SUPER_ADMIN`, `ADMIN`) para control de acceso.
+  * **Transaction**: El corazón de los movimientos financieros, con un campo `type` que puede ser `INSTALLMENT` para indicar transacciones de cuotas.
   * **Loan** (préstamo entregado): id, beneficiario, monto, fechaInicio, tasa (opcional), cuotas?, pagos[].
-  * **LoanPayment**: id, loanId, fecha, monto, saldoRestante.
-
-Ejemplo de esquema de datos (SQL):
+  * **LoanPayment**: id, loanId, fecha, monto, allocation.
 
 
-
------
 
 ## Lógica Financiera
 
@@ -128,11 +126,10 @@ Ejemplo de esquema de datos (SQL):
 
 **Préstamos entregados**
 
-  * Al registrar un préstamo: `Loan(totalAmount, borrower, startDate)`.
-  * Cada pago recibido (`LoanPayment`) reduce el `remaining`.
-  * `remaining = totalAmount - SUM(payments.amount)`.
-  * Estado cambia a **CLOSED** cuando `remaining = 0`.
-  * Alertas si un pago esperado (según plan) no se recibe a tiempo.
+  * Al registrar un préstamo: `Loan(principal, counterpartyId, issueDate, status, interestRate?, scheduleType?, termMonths?)`.
+  * Cada pago recibido (`LoanPayment`) reduce el `outstandingPrincipal`. La lógica actual no distingue entre principal, interés o comisiones; todo pago reduce el capital pendiente.
+  * Estado cambia a **CLOSED** cuando `outstandingPrincipal <= 0`.
+  * La funcionalidad de intereses, tipos de cronograma y alertas por mora está contemplada en el modelo de datos, pero aún no implementada en la lógica de negocio.
 
 -----
 
@@ -320,7 +317,7 @@ Una vez configurado el entorno, puedes iniciar la aplicación:
 2.  **Iniciar el Frontend**:
     ```bash
     cd frontend # si no estás ya en el directorio
-    npm run dev # o el comando para iniciar el servidor de desarrollo de Next.js
+    npm run dev # o el comando para iniciar el servidor de desarrollo de Vue.js
     ```
     El frontend debería estar disponible en `http://localhost:3001` (o el puerto configurado).
 

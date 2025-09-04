@@ -56,7 +56,7 @@ Este documento detalla las funcionalidades clave de la aplicación desde la pers
 *   **Datos a Mostrar/Ingresar**:
     *   `amount`, `date`, `description`, `accountId`, `categoryId`.
     *   Para transferencias: `sourceAccountId`, `destinationAccountId`.
-*   **Integración con la API**: `POST /transactions` (con lógica interna para manejar `TRANSFER` type).
+*   **Integración con la API**: `POST /transactions/regular`, `POST /transactions/transfer`.
 
 ---
 
@@ -82,7 +82,7 @@ Este documento detalla las funcionalidades clave de la aplicación desde la pers
 *   **Datos a Mostrar/Ingresar**:
     *   `categoryId`, `year`, `month`, `amount`, `rollover`.
     *   Calculados: `spentAmount`, `remainingAmount`.
-*   **Integración con la API**: `GET /budgets`, `POST /budgets`, `PUT /budgets/:id`, `GET /budgets/:id/transactions`.
+*   **Integración con la API**: `GET /budgets`, `POST /budgets`, `PUT /budgets/:id`.
 
 ---
 
@@ -148,7 +148,7 @@ Este documento detalla las funcionalidades clave de la aplicación desde la pers
 
 ---
 
-## 10. Alertas y Notificaciones
+## 10. Alertas y Notificaciones (Característica Planificada)
 
 *   **Objetivo**: Informar al usuario sobre eventos importantes (vencimientos, presupuestos excedidos).
 *   **Flujo de Usuario (UX/UI)**:
@@ -157,4 +157,4 @@ Este documento detalla las funcionalidades clave de la aplicación desde la pers
     *   **Configuración de Alertas**: Opcional, permitir al usuario personalizar qué alertas quiere recibir.
 *   **Datos a Mostrar/Ingresar**:
     *   Mensaje de la alerta, fecha, tipo.
-*   **Integración con la API**: `GET /notifications`, `PUT /notifications/:id/read`.
+*   **Integración con la API**: (Endpoints a definir en futuras fases de desarrollo).

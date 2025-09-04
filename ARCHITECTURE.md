@@ -23,10 +23,10 @@ La aplicación sigue una arquitectura de microservicios o una arquitectura modul
 
 *   **Frontend (Web)**: Vue3, TypeScript, shadcn/ui, Tailwind CSS.
 *   **Frontend (Mobile)**: Flutter (Dart).
-*   **Backend (API)**: Node.js + TypeScript (NestJS o Express con modularización).
+*   **Backend (API)**: Node.js + TypeScript (Express.js con modularización).
 *   **Base de Datos**: PostgreSQL.
 *   **ORM**: SQL Puro (futuro TypeORM).
-*   **Cache/Jobs**: Redis.
+*   **Cache/Jobs**: Redis (considerado para futuras implementaciones de caché y tareas en segundo plano).
 *   **Infraestructura**: Docker Compose (local), escalable a Azure (PaaS, DBaaS).
 
 ## 3. Componentes Detallados
@@ -75,10 +75,10 @@ El backend es el cerebro de la aplicación, responsable de la lógica de negocio
 
 ### 3.3. Base de Datos
 
-PostgreSQL es la base de datos relacional elegida, gestionada a través de SQL puro. Se planea migrar a TypeORM en el futuro para un desarrollo más eficiente y tipado seguro.
+PostgreSQL es la base de datos relacional elegida, gestionada a través de SQL puro.
 
 *   **Tecnología**: PostgreSQL.
-*   **ORM**: SQL Puro (futuro TypeORM).
+*   **ORM**: SQL Puro.
 *   **Esquema de Datos (Definido en `create_db.sql`)**:
 
     *   `User`: Gestión de usuarios (preparado para SaaS).
@@ -101,7 +101,7 @@ PostgreSQL es la base de datos relacional elegida, gestionada a través de SQL p
 
 ### 3.4. Otros Servicios
 
-*   **Redis (Cache/Jobs)**: Utilizado para tareas en segundo plano (ej. procesamiento de importaciones, generación de reportes complejos) y para caching de datos frecuentemente accedidos, mejorando el rendimiento.
+*   **Redis (Cache/Jobs)**: Considerado para futuras implementaciones de tareas en segundo plano (ej. procesamiento de importaciones, generación de reportes complejos) y para caching de datos frecuentemente accedidos, mejorando el rendimiento.
 
 ## 4. Lógica Financiera Clave
 

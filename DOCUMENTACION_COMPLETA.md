@@ -19,6 +19,8 @@
 - TypeScript
 - PostgreSQL (Base de datos)
 - SQL Puro (para interacciones con la base de datos)
+- Autenticación (JWT)
+- Roles (RBAC)
 
 **Frontend:**
 - Vue.js 3
@@ -43,26 +45,35 @@ Frontend (Vue.js) ←→ API REST (Node.js/Express.js) ←→ Base de Datos (Pos
 ```
 src/
 ├── config/          # Configuración de la base de datos
-├── middleware/      # Middlewares de Express (ej. autenticación)
+├── middleware/      # Middlewares de Express (ej. autenticación, roles)
 ├── repositories/    # Interacción directa con la base de datos (SQL Puro)
+│   └── userRepository.ts # Repositorio para usuarios
 ├── routes/          # Definición de rutas
+│   ├── authRoutes.ts    # Rutas de autenticación (login, registro)
+│   └── userRoutes.ts    # Rutas para gestión de usuarios
 ├── services/        # Lógica de negocio
+│   ├── authService.ts   # Lógica de autenticación
+│   └── userService.ts   # Lógica de gestión de usuarios
 └── index.ts         # Entrada del servidor
 ```
 
 ### 🔗 ENDPOINTS DISPONIBLES (Resumen)
 
+Todos los endpoints están prefijados con `/api`.
+
 | Módulo | Endpoints Comunes |
 | :--- | :--- |
-| **Cuentas** | `GET /api/accounts`, `POST /api/accounts`, `GET /api/accounts/:id`, `PUT /api/accounts/:id`, `DELETE /api/accounts/:id` |
-| **Transacciones** | `GET /api/transactions`, `POST /api/transactions/regular`, `POST /api/transactions/transfer`, `GET /api/transactions/:id`, `PUT /api/transactions/:id`, `DELETE /api/transactions/:id` |
-| **Categorías** | `GET /api/categories`, `POST /api/categories`, `GET /api/categories/:id`, `PUT /api/categories/:id`, `DELETE /api/categories/:id` |
-| **Presupuestos** | `GET /api/budgets`, `POST /api/budgets`, `GET /api/budgets/:id`, `PUT /api/budgets/:id`, `DELETE /api/budgets/:id` |
-| **Préstamos y Contrapartes** | `GET /api/loans/counterparties`, `POST /api/loans/counterparties`, `GET /api/loans/loans`, `POST /api/loans/loans`, `GET /api/loans/loans/:id`, `POST /api/loans/loans/:id/payments` |
-| **Planes de Cuotas** | `GET /api/installments`, `POST /api/installments`, `GET /api/installments/:id`, `POST /api/installments/:id/pay`, `GET /api/installments/:id/installments` |
-| **Dashboard** | `GET /api/dashboard/summary` |
-| **Reportes** | `GET /api/reports/loan-installment-status`, `GET /api/reports/upcoming-obligations`, `GET /api/reports/income-expense-summary`, `GET /api/reports/balance-evolution`, `GET /api/reports/spending-by-category`, `GET /api/reports/cash-flow`, `GET /api/reports/budget-summary` |
-| **Importación** | `POST /api/import/transactions` |
+| **Autenticación** | `POST /auth/login` |
+| **Usuarios** | `GET /users`, `POST /users`, `GET /users/:id`, `PUT /users/:id`, `DELETE /users/:id` |
+| **Cuentas** | `GET /accounts`, `POST /accounts`, `GET /accounts/:id`, `PUT /accounts/:id`, `DELETE /accounts/:id` |
+| **Transacciones** | `GET /transactions`, `POST /transactions/regular`, `POST /transactions/transfer`, `GET /transactions/:id`, `PUT /transactions/:id`, `DELETE /transactions/:id` |
+| **Categorías** | `GET /categories`, `POST /categories`, `GET /categories/:id`, `PUT /categories/:id`, `DELETE /categories/:id` |
+| **Presupuestos** | `GET /budgets`, `POST /budgets`, `GET /budgets/:id`, `PUT /budgets/:id`, `DELETE /budgets/:id` |
+| **Préstamos y Contrapartes** | `GET /loans/counterparties`, `POST /loans/counterparties`, `GET /loans/loans`, `POST /loans/loans`, `GET /loans/loans/:id`, `POST /loans/loans/:id/payments` |
+| **Planes de Cuotas** | `GET /installments`, `POST /installments`, `GET /installments/:id`, `POST /installments/:id/pay`, `GET /installments/:id/installments` |
+| **Dashboard** | `GET /dashboard/summary` |
+| **Reportes** | `GET /reports/loan-installment-status`, `GET /reports/upcoming-obligations`, `GET /reports/income-expense-summary`, `GET /reports/balance-evolution`, `GET /reports/spending-by-category`, `GET /reports/cash-flow`, `GET /reports/budget-summary` |
+| **Importación** | `POST /import/transactions` |
 
 ---
 
@@ -79,8 +90,12 @@ src/
 ├── router/          # Configuración de rutas
 ├── services/        # Lógica de comunicación con la API (apiService)
 ├── stores/          # Stores de Pinia (estado global)
+│   ├── authStore.ts     # Gestión de autenticación y estado del usuario
+│   └── userStore.ts     # Gestión de usuarios (CRUD)
 ├── types/           # Definiciones de tipos
 ├── views/           # Vistas/Pantallas principales
+│   ├── Login.vue        # Vista de inicio de sesión
+│   ├── UserManagement.vue # Vista de gestión de usuarios
 │   └── reports/     # Vistas específicas para cada reporte
 └── main.ts          # Entrada de la aplicación
 ```
@@ -89,6 +104,7 @@ src/
 
 | Ruta | Vista/Componente Principal |
 | :--- | :--- |
+| `/login` | `Login.vue` |
 | `/` | `Dashboard.vue` |
 | `/accounts` | `AccountList.vue` |
 | `/accounts/create` | `AccountForm.vue` |
@@ -109,10 +125,12 @@ src/
 | `/reports/upcoming-obligations` | `UpcomingObligationsReport.vue` |
 | `/reports/budget-summary` | `BudgetSummaryReport.vue` |
 | `/reports/loan-installment-status` | `LoanInstallmentStatusReport.vue` |
+| `/users` | `UserManagement.vue` |
 
 ### 🗃️ STORES DE PINIA
 
 - `accountStore`
+- `authStore`
 - `budgetStore`
 - `categoryStore`
 - `dashboardStore`
@@ -120,6 +138,7 @@ src/
 - `loanStore`
 - `reportStore`
 - `transactionStore`
+- `userStore`
 
 ### Diseño de Layout y Navegación (Sidebar)
 
@@ -151,6 +170,7 @@ Esta sección detalla qué rutas del frontend interactúan con qué endpoints de
 
 | Ruta Frontend (URL) | Vista/Componente Principal | Store (Pinia) | Endpoints API Backend Consumidos |
 | :--- | :--- | :--- | :--- |
+| `/login` | `Login.vue` | `authStore.ts` | `POST /api/auth/login` |
 | `/` | `Dashboard.vue` | `dashboardStore.ts` | `GET /api/dashboard/summary` |
 | `/accounts` | `AccountList.vue` / `AccountForm.vue` | `accountStore.ts` | `GET /api/accounts`<br>`POST /api/accounts`<br>`PUT /api/accounts/:id`<br>`DELETE /api/accounts/:id` |
 | `/transactions/create` | `TransactionForm.vue` | `transactionStore.ts` | `POST /api/transactions/regular`<br>`POST /api/transactions/transfer` |
@@ -160,6 +180,7 @@ Esta sección detalla qué rutas del frontend interactúan con qué endpoints de
 | `/installments` | `InstallmentPlanList.vue` / `InstallmentDetail.vue` | `installmentStore.ts` | `GET /api/installments`<br>`POST /api/installments`<br>`GET /api/installments/:id/installments`<br>`POST /api/installments/:id/pay` |
 | `/import` | `DataImport.vue` | `transactionStore.ts` (indirectamente) | `POST /api/import/transactions` |
 | `/reports/*` | Vistas en `views/reports/` | `reportStore.ts` | `GET /api/reports/*` (con varios parámetros) |
+| `/users` | `UserManagement.vue` | `userStore.ts` | `GET /api/users`<br>`POST /api/users`<br>`PUT /api/users/:id`<br>`DELETE /api/users/:id` |
 
 ---
 
@@ -201,8 +222,8 @@ Esta sección detalla las reglas y comportamientos clave que rigen las funcional
 *   **Tipos de Préstamo**: El modelo de datos soporta tipos de préstamo como `INTEREST_FREE`, `SIMPLE` y `FIXED`, pero la lógica de negocio para el cálculo de intereses y cuotas fijas aún no está implementada. Actualmente, todos los préstamos funcionan como si fueran de tipo `INTEREST_FREE`.
 *   **Cierre**: El `status` cambia a `CLOSED` cuando `outstandingPrincipal <= 0`.
 
-### 6. Manejo de Reembolsos y Devoluciones (Futuro)
+### 6. Manejo de Reembolsos y Devoluciones
 
 *   **Concepto**: Un caso de uso común que impacta directamente en la conciliación de saldos.
-*   **Implementación (propuesta)**: Se puede crear un tipo de transacción específico como `REFUND` o `REIMBURSEMENT`.
-*   **Lógica de Ajuste (propuesta)**: El sistema permitiría anular una transacción previa o registrar un nuevo movimiento que ajuste el saldo de la cuenta o tarjeta (ej: reducir el `paidAmount` pendiente de una compra o generar un crédito).
+*   **Implementación**: Se creará un tipo de transacción específico como `REFUND` o `REIMBURSEMENT`.
+*   **Lógica de Ajuste**: El sistema permitirá anular una transacción previa o registrar un nuevo movimiento que ajuste el saldo de la cuenta o tarjeta (ej: reducir el `paidAmount` pendiente de una compra o generar un crédito).
