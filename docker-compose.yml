@@ -27,18 +27,16 @@ services:
       context: ./FinanzasBackend
       dockerfile: Dockerfile
     restart: always
+    command: npm run dev
     env_file:
       - .env
     ports:
       - "${API_PORT}:${API_PORT}"
     depends_on:
       - db
-    # Volumes are commented out to ensure the container runs with the code and modules
-    # built into the image, which is more reliable. For development with hot-reload,
-    # these lines can be restored, but you must manage node_modules locally.
-    # volumes:
-    #   - ./FinanzasBackend:/usr/src/app
-    #   - /usr/src/app/node_modules
+    volumes:
+      - ./FinanzasBackend:/usr/src/app
+      - /usr/src/app/node_modules
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
@@ -52,50 +50,48 @@ services:
       context: ./FinanzasFrontend
       dockerfile: Dockerfile
     restart: always
+    command: npm run dev
     ports:
-      - "${FRONTEND_PORT}:80"
+      - "${FRONTEND_PORT}:5173"
+    volumes:
+      - ./FinanzasFrontend:/app
+      - /app/node_modules
     depends_on:
       - backend
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
 
-  prometheus:
-    image: prom/prometheus
-    container_name: finanzas-prometheus
-    restart: always
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus:/etc/prometheus
-      - prometheus_data:/prometheus
-    command: --config.file=/etc/prometheus/prometheus.yml
-    depends_on:
-      backend:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+  # prometheus:
+  #   image: prom/prometheus
+  #   container_name: finanzas-prometheus
+  #   restart: always
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./prometheus:/etc/prometheus
+  #     - prometheus_data:/prometheus
+  #   command: --config.file=/etc/prometheus/prometheus.yml
+  #   depends_on:
+  #     backend:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 30s
 
-  grafana:
-    image: grafana/grafana
-    container_name: finanzas-grafana
-    restart: always
-    ports:
-      - "3001:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    depends_on:
-      prometheus:
-        condition: service_healthy
+  # grafana:
+  #   image: grafana/grafana
+  #   container_name: finanzas-grafana
+  #   restart: always
+  #   ports:
+  #     - "3001:3000"
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #   depends_on:
+  #     prometheus:
+  #       condition: service_healthy
 
 volumes:
   pgdata:
-  prometheus_data:
-  grafana_data:
+  # prometheus_data:
+  # grafana_data:

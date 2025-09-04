@@ -97,10 +97,9 @@ La aplicación busca permitir registrar, organizar y analizar de forma clara tod
 ## Arquitectura
 
   * **Web**: Vue3, TypeScript, shadcn/ui, Tailwind.
-  * **Backend**: Node.js + TypeScript (NestJS o Express con modularización).
+  * **Backend**: Node.js + Express.js con modularización.
   * **Base de Datos**: PostgreSQL (SQL Puro).
-  * **Cache/Jobs**: Redis.
-  * **Infraestructura**: Docker Compose local; escalable a Azure (PaaS, DBaaS) en versión SaaS.
+  * **Infraestructura**: Docker Compose local para servicios futuros; actualmente la base de datos se ejecuta localmente. Escalable a Azure (PaaS, DBaaS) en versión SaaS.
   * **Móvil (futuro)**: Flutter (iOS/Android) consumiendo la misma API.
   * **Autenticación**: simple (para uso personal), escalable a OAuth/JWT.
 
@@ -275,7 +274,7 @@ Para poner en marcha el proyecto localmente, necesitarás los siguientes prerreq
 
   * **Node.js**: Versión 18 o superior.
   * **npm** (Node Package Manager): Viene con Node.js.
-  * **Docker y Docker Compose**: Para la base de datos (PostgreSQL) y Redis.
+  * **PostgreSQL**: Una instancia local de PostgreSQL en ejecución.
   * **Git**: Para clonar el repositorio.
 
 ### Pasos de Instalación
@@ -285,29 +284,26 @@ Para poner en marcha el proyecto localmente, necesitarás los siguientes prerreq
     git clone <URL_DEL_REPOSITORIO>
     cd <nombre_del_repositorio>
     ```
-2.  **Configurar la Base de Datos y Cache (Docker Compose)**:
-    ```bash
-    docker-compose up -d
-    ```
-    Esto levantará los contenedores de PostgreSQL y Redis. Asegúrate de que los puertos no estén en uso.
+2.  **Configurar la Base de Datos**:
+    Asegúrate de que tu instancia local de PostgreSQL esté en funcionamiento.
+    Crea una base de datos para el proyecto.
 3.  **Instalar Dependencias del Backend**:
     ```bash
-    cd backend # o la ruta a tu carpeta de backend
+    cd FinanzasBackend
     npm install
     ```
 4.  **Configurar Variables de Entorno del Backend**:
-    Crea un archivo `.env` en la raíz del directorio del backend con las variables de entorno necesarias (ej. `DATABASE_URL`, `REDIS_URL`, etc.). Consulta un posible archivo `.env.example` si existe.
-5.  **Ejecutar Migraciones de la Base de Datos**:
-    ```bash
-    Ejecutar el script `create_db.sql` para inicializar la base de datos.
-    ```
+    Crea un archivo `.env` en la raíz del directorio del backend (`FinanzasBackend`) con la variable de entorno `DATABASE_URL` apuntando a tu base de datos local.
+    Ejemplo: `DATABASE_URL="postgresql://user:password@localhost:5432/database_name"`
+5.  **Ejecutar el Script de Creación de la Base de Datos**:
+    Ejecuta el contenido del script `create_db.sql` en tu base de datos para crear las tablas necesarias.
 6.  **Instalar Dependencias del Frontend**:
     ```bash
-    cd ../frontend # o la ruta a tu carpeta de frontend
+    cd ../FinanzasFrontend
     npm install
     ```
 7.  **Configurar Variables de Entorno del Frontend**:
-    Crea un archivo `.env.local` en la raíz del directorio del frontend con las variables de entorno necesarias (ej. `NEXT_PUBLIC_API_URL`).
+    Crea un archivo `.env.local` en la raíz del directorio del frontend (`FinanzasFrontend`) con la variable `VITE_API_URL` apuntando a la URL del backend (ej. `VITE_API_URL=http://localhost:3000/api`).
 
 -----
 
