@@ -1,7 +1,26 @@
+-- Eliminar tablas si existen (en orden inverso de dependencia)
+DROP TABLE IF EXISTS "Installment";
+DROP TABLE IF EXISTS "InstallmentPlan";
+DROP TABLE IF EXISTS "LoanPayment";
+DROP TABLE IF EXISTS "Loan";
+DROP TABLE IF EXISTS "Counterparty";
+DROP TABLE IF EXISTS "Budget";
+DROP TABLE IF EXISTS "Transaction";
+DROP TABLE IF EXISTS "Account";
+DROP TABLE IF EXISTS "Category";
+DROP TABLE IF EXISTS "User";
+
+-- Eliminar tipos ENUM si existen
+DROP TYPE IF EXISTS "TransactionType";
+DROP TYPE IF EXISTS "LoanScheduleType";
+DROP TYPE IF EXISTS "LoanPaymentAllocation";
+DROP TYPE IF EXISTS user_role;
+
 -- Crear tipos ENUM
 CREATE TYPE "TransactionType" AS ENUM ('REGULAR', 'TRANSFER', 'LENDING', 'INSTALLMENT');
 CREATE TYPE "LoanScheduleType" AS ENUM ('INTEREST_FREE', 'SIMPLE', 'FIXED');
 CREATE TYPE "LoanPaymentAllocation" AS ENUM ('PRINCIPAL', 'INTEREST', 'FEE');
+CREATE TYPE user_role AS ENUM ('SUPER_ADMIN', 'ADMIN');
 
 -- Crear tabla User
 CREATE TABLE "User" (
@@ -9,6 +28,7 @@ CREATE TABLE "User" (
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255),
     password VARCHAR(255) NOT NULL,
+    role user_role NOT NULL DEFAULT 'ADMIN',
     "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL
 );

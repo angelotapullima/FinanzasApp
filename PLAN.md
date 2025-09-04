@@ -104,3 +104,62 @@ Establecer el entorno de desarrollo y desarrollar la funcionalidad completa de g
     - [ ] 11.1. **Optimización de Borrado en Cascada:** Refactorizar `installmentService` y `loanService` para usar una única consulta SQL en lugar de bucles para el borrado.
     - [ ] 11.2. **Centralizar Lógica de Unión de Datos:** Mover la lógica de combinación de datos (ej. añadir `counterpartyName` a los préstamos) del frontend al backend.
     - [ ] 11.3. **Eliminar Placeholders:** Reemplazar valores hardcodeados (como el `categoryId` en transferencias) por configuraciones o selecciones dinámicas.
+- [ ] **Fase 12: Autenticación y Gestión de Usuarios (SQL Puro)**
+    - [ ] **12.1. Backend: Base de Datos y JWT**
+        - [x] 12.1.1. Modificar la tabla `User` en la base de datos para añadir la columna `role` (usando un `ENUM` de PostgreSQL `user_role`).
+        - [x] 12.1.2. Instalar `jsonwebtoken`, `bcryptjs` y sus tipos (`@types/jsonwebtoken`, `@types/bcryptjs`).
+        - [x] 12.1.3. Implementar la lógica de login en un nuevo `authService.ts` usando consultas SQL puras para buscar usuarios y `bcrypt` para comparar contraseñas.
+        - [x] 12.1.4. Crear `authRoutes.ts` para la ruta `POST /api/auth/login`.
+    - [ ] **12.2. Backend: Middlewares y Roles**
+        - [x] 12.2.1. Crear `authMiddleware.ts` para verificar el JWT y añadir `userId` y `role` al objeto `req`.
+        - [x] 12.2.2. Crear `roleMiddleware.ts` que restrinja el acceso basado en roles.
+        - [x] 12.2.3. Proteger las rutas existentes de la API con `authMiddleware`.
+    - [ ] **12.3. Backend: CRUD de Usuarios (SQL Puro y solo SUPER_ADMIN)**
+        - [x] 12.3.1. Crear `userRepository.ts` con funciones para el CRUD de usuarios (`findUserById`, `createUser`, etc.) usando SQL puro.
+        - [x] 12.3.2. Crear `userService.ts` con la lógica de negocio (hasheo de contraseñas, etc.).
+        - [x] 12.3.3. Crear `userRoutes.ts` y protegerlas con `roleMiddleware` para que solo `SUPER_ADMIN` pueda acceder.
+    - [ ] **12.4. Frontend: Login y Estado Global**
+        - [x] 12.4.1. Crear la vista `Login.vue` con su formulario.
+        - [x] 12.4.2. Crear `authStore.ts` (Pinia) para manejar el token y el estado del usuario, con persistencia en `localStorage`.
+        - [x] 12.4.3. Modificar `apiService.ts` para que envíe el token JWT en todas las peticiones.
+    - [ ] **12.5. Frontend: Protección de Rutas y UI**
+        - [x] 12.5.1. Implementar un "navigation guard" en `router/index.ts` para proteger las rutas.
+        - [x] 12.5.2. Adaptar la UI (ej. el sidebar) para mostrar/ocultar opciones según el rol del usuario.
+    - [ ] **12.6. Frontend: Gestión de Usuarios (UI para SUPER_ADMIN)**
+        - [x] 12.6.1. Crear la vista `UserManagement.vue`.
+        - [x] 12.6.2. Crear los componentes `UserList.vue` y `UserForm.vue`.
+        - [x] 12.6.3. Integrar los componentes con los nuevos endpoints de `/api/users`.
+- [ ] **Fase 13: Auto-registro y Gestión de Suscripciones (Trial)**
+    - [ ] **13.1. Backend: Modelo de Usuario y Registro**
+        - [ ] 13.1.1. Modificar la tabla `User` en la base de datos para añadir las columnas `trial_ends_at` (TIMESTAMP WITH TIME ZONE) e `is_paid_user` (BOOLEAN).
+        - [ ] 13.1.2. Crear un nuevo endpoint `POST /api/auth/register` para el auto-registro de usuarios.
+        - [ ] 13.1.3. Implementar la lógica de registro en `authService.ts` (hasheo de contraseña, asignación de rol `ADMIN`, `trial_ends_at` a 7 días, `is_paid_user` a `FALSE`).
+    - [ ] **13.2. Backend: Middleware de Suscripción y Endpoint de Pago**
+        - [ ] 13.2.1. Crear `subscriptionMiddleware.ts` para verificar el estado de la prueba/pago del usuario.
+        - [ ] 13.2.2. Aplicar `subscriptionMiddleware` a las rutas de la API que requieran acceso completo.
+        - [ ] 13.2.3. Crear un nuevo endpoint `POST /api/payment/subscribe` (placeholder) para simular el pago y actualizar `is_paid_user` a `TRUE`.
+    - [ ] **13.3. Frontend: Formulario de Registro y Flujo**
+        - [ ] 13.3.1. Crear la vista `Register.vue` con su formulario.
+        - [ ] 13.3.2. Añadir la ruta `/register` en `router/index.ts` (pública).
+        - [ ] 13.3.3. Modificar `authStore.ts` para manejar el registro y los nuevos campos del usuario.
+    - [ ] **13.4. Frontend: Interfaz de Usuario y Flujo de Pago**
+        - [ ] 13.4.1. Crear la vista `Payment.vue` (placeholder) con su formulario.
+        - [ ] 13.4.2. Añadir la ruta `/payment` en `router/index.ts` (protegida por `authMiddleware`, pero no por `subscriptionMiddleware`).
+        - [ ] 13.4.3. Adaptar el `Layout.vue` o el `Dashboard.vue` para mostrar mensajes sobre el estado de la prueba.
+        - [ ] 13.4.4. Implementar la lógica de redirección a `/payment` si la prueba expira.
+        - [ ] 13.4.5. Implementar lógica de "feature gating" en el frontend (deshabilitar/ocultar funcionalidades si no ha pagado).
+
+
+
+
+
+   - Usuario SUPER_ADMIN:
+         - Email: superadmin@finanzas.com
+       - Contraseña: super_admin_password_hash (Nota: Esta es una contraseña en texto plano en el
+         script de datos de prueba. En un entorno real, deberías hashearla antes de insertarla o
+         usar el endpoint de registro para crear usuarios de forma segura).
+
+   - Usuario ADMIN:
+       - Email: admin@finanzas.com
+       - Contraseña: admin_password_hash (Igualmente, esta es una contraseña en texto plano en el
+         script de datos de prueba).
