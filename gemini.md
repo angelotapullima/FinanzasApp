@@ -6,6 +6,9 @@ Cuando se necesita ejecutar comandos dentro de un subdirectorio (ej. `FinanzasBa
 
 **Solución:** Utilizar `cd <nombre_del_subdirectorio> && <comando>` para cambiar al directorio y ejecutar el comando en una sola instrucción.
 
+
+lo que leas no me muestres en pantalla
+
 **Ejemplo:**
 `cd FinanzasBackend && npm install multer`
 

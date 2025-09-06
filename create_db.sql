@@ -1,14 +1,16 @@
 -- Eliminar tablas si existen (en orden inverso de dependencia)
-DROP TABLE IF EXISTS "Installment";
-DROP TABLE IF EXISTS "InstallmentPlan";
-DROP TABLE IF EXISTS "LoanPayment";
-DROP TABLE IF EXISTS "Loan";
-DROP TABLE IF EXISTS "Counterparty";
-DROP TABLE IF EXISTS "Budget";
-DROP TABLE IF EXISTS "Transaction";
-DROP TABLE IF EXISTS "Account";
-DROP TABLE IF EXISTS "Category";
-DROP TABLE IF EXISTS "User";
+DROP TABLE IF EXISTS "Installment" CASCADE;
+DROP TABLE IF EXISTS "InstallmentPlan" CASCADE;
+DROP TABLE IF EXISTS "LoanPayment" CASCADE;
+DROP TABLE IF EXISTS "Loan" CASCADE;
+DROP TABLE IF EXISTS "Counterparty" CASCADE;
+DROP TABLE IF EXISTS "Budget" CASCADE;
+DROP TABLE IF EXISTS "Transaction" CASCADE;
+DROP TABLE IF EXISTS "Account" CASCADE;
+DROP TABLE IF EXISTS "Category" CASCADE;
+DROP TABLE IF EXISTS "DebtPayment" CASCADE; -- Added CASCADE
+DROP TABLE IF EXISTS "Debt" CASCADE; -- Added CASCADE
+DROP TABLE IF EXISTS "User" CASCADE;
 
 -- Eliminar tipos ENUM si existen
 DROP TYPE IF EXISTS "TransactionType";
@@ -30,7 +32,10 @@ CREATE TABLE "User" (
     password VARCHAR(255) NOT NULL,
     role user_role NOT NULL DEFAULT 'ADMIN',
     "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL,
+    trial_ends_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() + INTERVAL '7 days',
+    is_paid_user BOOLEAN DEFAULT FALSE,
+    subscription_expires_at TIMESTAMP WITH TIME ZONE
 );
 
 -- Crear tabla Account
@@ -42,6 +47,11 @@ CREATE TABLE "Account" (
     balance NUMERIC(18, 2) DEFAULT 0 NOT NULL,
     "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "userId" VARCHAR(255) NOT NULL,
+    credit_limit NUMERIC(18, 2),
+    current_statement_balance NUMERIC(18, 2),
+    available_credit NUMERIC(18, 2),
+    statement_due_date TIMESTAMP WITH TIME ZONE,
+    payment_due_date TIMESTAMP WITH TIME ZONE,
     CONSTRAINT fk_account_user FOREIGN KEY ("userId") REFERENCES "User"(id)
 );
 CREATE INDEX idx_account_user_id ON "Account" ("userId");
@@ -150,4 +160,33 @@ CREATE TABLE "Installment" (
     "paidAt" TIMESTAMP WITH TIME ZONE,
     status VARCHAR(255) NOT NULL, -- e.g., 'PENDING', 'PAID', 'PARTIAL'
     CONSTRAINT fk_installment_installment_plan FOREIGN KEY ("installmentPlanId") REFERENCES "InstallmentPlan"(id)
+);
+
+-- Crear tabla Debt
+CREATE TABLE "Debt" (
+    id VARCHAR(255) PRIMARY KEY,
+    lender_name VARCHAR(255) NOT NULL,
+    original_amount NUMERIC(18, 2) NOT NULL,
+    outstanding_balance NUMERIC(18, 2) NOT NULL,
+    interest_rate NUMERIC(5, 4),
+    start_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_date TIMESTAMP WITH TIME ZONE,
+    payment_frequency VARCHAR(50),
+    next_payment_date TIMESTAMP WITH TIME ZONE,
+    next_payment_amount NUMERIC(18, 2),
+    status VARCHAR(50) NOT NULL, -- e.g., 'ACTIVE', 'PAID', 'DEFAULTED'
+    "userId" VARCHAR(255) NOT NULL,
+    CONSTRAINT fk_debt_user FOREIGN KEY ("userId") REFERENCES "User"(id)
+);
+CREATE INDEX idx_debt_user_id ON "Debt" ("userId");
+
+-- Crear tabla DebtPayment
+CREATE TABLE "DebtPayment" (
+    id VARCHAR(255) PRIMARY KEY,
+    "debtId" VARCHAR(255) NOT NULL,
+    date TIMESTAMP WITH TIME ZONE NOT NULL,
+    amount NUMERIC(18, 2) NOT NULL,
+    allocation "LoanPaymentAllocation" NOT NULL, -- Reutilizando el ENUM existente
+    note TEXT,
+    CONSTRAINT fk_debt_payment_debt FOREIGN KEY ("debtId") REFERENCES "Debt"(id)
 );

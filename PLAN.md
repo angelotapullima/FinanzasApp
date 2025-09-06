@@ -170,8 +170,6 @@ Establecer el entorno de desarrollo y desarrollar la funcionalidad completa de g
 
 
 
-
-
    - Usuario SUPER_ADMIN:
          - Email: superadmin@finanzas.com
        - Contraseña: super_admin_password_hash (Nota: Esta es una contraseña en texto plano en el
@@ -182,3 +180,41 @@ Establecer el entorno de desarrollo y desarrollar la funcionalidad completa de g
        - Email: admin@finanzas.com
        - Contraseña: admin_password_hash (Igualmente, esta es una contraseña en texto plano en el
          script de datos de prueba).
+
+## Fase 14: Gestión Detallada de Tarjetas de Crédito y Deudas [COMPLETA] [COMPLETA] [COMPLETA]
+
+*   **Objetivo**: Ampliar la funcionalidad para incluir el seguimiento detallado de tarjetas de crédito (límites, saldos, fechas de pago) y la gestión de deudas personales (préstamos recibidos).
+
+*   **14.1. Gestión Detallada de Tarjetas de Crédito**
+    *   [x] **14.1.1. Backend: Modelo de Datos y Lógica**
+        *   [x] Modificar la tabla `Account` para añadir campos específicos para tarjetas de crédito: `credit_limit NUMERIC(18, 2)`, `current_statement_balance NUMERIC(18, 2)`, `available_credit NUMERIC(18, 2)`, `statement_due_date TIMESTAMP WITH TIME ZONE`, `payment_due_date TIMESTAMP WITH TIME ZONE`. (Alternativa: Crear una tabla `CreditCard` separada y vincularla a `Account` si la complejidad lo justifica).
+        *   [x] Implementar lógica en `transactionService` para actualizar `current_statement_balance` y `available_credit` cuando se registran transacciones con tipo de cuenta `CreditCard`.
+        *   [x] Crear/modificar endpoints para CRUD de cuentas que manejen estos nuevos campos para tarjetas de crédito.
+    *   [x] **14.1.2. Frontend: UI y Flujo**
+        *   [x] Actualizar `AccountForm.vue` para incluir los nuevos campos cuando el tipo de cuenta es 'Credit Card'.
+        *   [x] Actualizar `AccountList.vue` para mostrar un resumen de las tarjetas de crédito (límite, usado, disponible, fechas de pago).
+        *   [x] Integrar la información de tarjetas de crédito en el `Dashboard.vue` (ej. widget de resumen de tarjetas).
+
+*   **14.2. Gestión de Deudas Personales (Deudas que YO tengo)**
+    *   **14.2.1. Backend: Modelo de Datos y Lógica**
+        *   Crear una nueva tabla `Debt`: `id`, `lender_name VARCHAR(255)`, `original_amount NUMERIC(18, 2)`, `outstanding_balance NUMERIC(18, 2)`, `interest_rate NUMERIC(5, 4)`, `start_date TIMESTAMP WITH TIME ZONE`, `end_date TIMESTAMP WITH TIME ZONE`, `payment_frequency VARCHAR(50)`, `next_payment_date TIMESTAMP WITH TIME ZONE`, `next_payment_amount NUMERIC(18, 2)`, `status VARCHAR(50)`, `userId VARCHAR(255)`.
+        *   Crear una nueva tabla `DebtPayment`: `id`, `debt_id VARCHAR(255)`, `date TIMESTAMP WITH TIME ZONE`, `amount NUMERIC(18, 2)`, `allocation "LoanPaymentAllocation"` (reutilizar o crear nuevo ENUM), `note TEXT`.
+        *   Crear `debtRepository.ts`, `debtService.ts`, `debtRoutes.ts` para CRUD de deudas y pagos de deudas.
+        *   Implementar lógica para calcular `outstanding_balance` y `next_payment_amount`.
+    *   **14.2.2. Frontend: UI y Flujo**
+        *   Crear una nueva vista `Debts.vue` para listar y gestionar deudas.
+        *   Crear componentes `DebtList.vue` y `DebtForm.vue`.
+        *   Crear un `debtStore.ts` (Pinia) para manejar el estado de las deudas.
+        *   Añadir rutas para la gestión de deudas en `router/index.ts`.
+        *   Implementar UI para registrar pagos de deudas.
+
+*   **14.3. Reporte de Obligaciones Mensuales Consolidadas**
+    *   **14.3.1. Backend: Lógica de Reporte**
+        *   Crear un nuevo endpoint en `reportRoutes.ts` (ej. `GET /reports/monthly-obligations`) que consolide:
+            *   Pagos mínimos de tarjetas de crédito (si se implementa el seguimiento de estados de cuenta).
+            *   Próximas cuotas de `Installment` (ya existente).
+            *   Próximos pagos de `Debt` (nuevo).
+            *   Posiblemente, pagos fijos recurrentes (si se introduce un concepto de "transacciones recurrentes").
+    *   **14.3.2. Frontend: UI de Reporte**
+        *   Crear una nueva vista `MonthlyObligationsReport.vue` o integrar en el `Dashboard.vue`.
+        *   Mostrar un resumen claro de "cuánto voy a tener que pagar a fin de mes" desglosado por tipo (tarjetas, cuotas, deudas).

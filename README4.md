@@ -108,10 +108,18 @@ La aplicación busca permitir registrar, organizar y analizar de forma clara tod
 
 ## Modelo de Datos
 
-  * **User**: Se añade el campo `role` (`SUPER_ADMIN`, `ADMIN`) para control de acceso.
-  * **Transaction**: El corazón de los movimientos financieros, con un campo `type` que puede ser `INSTALLMENT` para indicar transacciones de cuotas.
-  * **Loan** (préstamo entregado): id, beneficiario, monto, fechaInicio, tasa (opcional), cuotas?, pagos[].
-  * **LoanPayment**: id, loanId, fecha, monto, allocation.
+El esquema de la base de datos se define y gestiona mediante scripts de SQL puro, que se encuentran en el archivo `create_db.sql`. Las entidades principales son:
+
+  * **User**: Contiene la información del usuario, incluyendo su rol (`SUPER_ADMIN`, `ADMIN`) para control de acceso y los datos de su suscripción (`is_paid_user`, `trial_ends_at`, `subscription_expires_at`).
+  * **Account**: Representa las fuentes de dinero del usuario (bancos, efectivo, etc.).
+  * **Category**: Para clasificar las transacciones.
+  * **Transaction**: El corazón de la aplicación, registra cada movimiento financiero. Incluye un campo `type` para distinguir entre gastos/ingresos (`REGULAR`), transferencias (`TRANSFER`), pagos de préstamos (`LENDING`) y pagos de cuotas (`INSTALLMENT`).
+  * **Budget**: Define los presupuestos mensuales por categoría.
+  * **Counterparty**: Almacena la información de las personas o entidades a las que el usuario presta dinero.
+  * **Loan**: Modela los préstamos que el usuario otorga.
+  * **LoanPayment**: Registra los pagos recibidos de los préstamos otorgados.
+  * **InstallmentPlan**: Agrupa las cuotas de una compra a plazos.
+  * **Installment**: Representa cada una de las cuotas individuales de un plan.
 
 
 
